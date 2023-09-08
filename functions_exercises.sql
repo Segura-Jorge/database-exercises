@@ -2,8 +2,8 @@
 
 
 -- 1. Create a new file named order_by_exercises.sql and copy in the contents of your exercise from the previous lesson.
+-- USE employees;
 /*
-- use employees;
 -- -- Find all current or previous employees with first names 'Irena', 'Vidya', or 'Maya' using IN. What is the employee number of the top three results?
 -- SELECT emp_no 
 -- FROM employees
@@ -179,7 +179,7 @@ FROM employees
 WHERE last_name LIKE 'e%e';
 
 -- 4. Use a function to determine how many results were returned from your previous query.
-SELECT COUNT(upper(concat(first_name, " ", last_name))) AS full_name
+SELECT COUNT(upper(concat(first_name, " ", last_name))) AS Total_Count_Names
 FROM employees
 WHERE last_name LIKE 'e%e';
 -- 899
@@ -188,6 +188,11 @@ WHERE last_name LIKE 'e%e';
 -- Use datediff() function to find how many days they have been working at the company 
 -- (Hint: You will also need to use NOW() or CURDATE()),
 SELECT (CURDATE() - hire_date) as Days_worked, e.*
+FROM employees as e
+WHERE hire_date BETWEEN '1990-01-01' AND '1999-12-31'
+	AND birth_date like '%12-25';
+
+SELECT datediff(curdate(), hire_date) as Days_worked, e.*
 FROM employees as e
 WHERE hire_date BETWEEN '1990-01-01' AND '1999-12-31'
 	AND birth_date like '%12-25';
@@ -219,15 +224,9 @@ From salaries;
 -- +------------+------------+-----------+------------+
 -- 10 rows in set (0.05 sec)
 */
-SELECT 
-    CONCAT(
-        LOWER(SUBSTRING(first_name, 1, 1)), 			-- First character of first name in lowercase
-        SUBSTRING(last_name, 1, 4), 					-- First 4 characters of last name
-        '_',
+SELECT lower(CONCAT(SUBSTRING(first_name, 1, 1), 			-- First character of first name in lowercase
+        SUBSTRING(last_name, 1, 4), '_',					-- First 4 characters of last name
         DATE_FORMAT(birth_date, '%m%y') 				-- Month and last two digits of birth year
-    ) AS username,
-    first_name,
-    last_name,
-    birth_date
-FROM 
-    employees;
+    )) AS username, first_name, last_name, birth_date
+FROM employees;
+
