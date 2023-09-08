@@ -81,7 +81,7 @@ SELECT emp_no, first_name, last_name
 FROM employees
 WHERE first_name IN ('Irena', 'Vidya', 'Maya')
 ORDER by first_name, last_name; 
--- A. Irena Acton, Viya Zweizig
+-- A. Irena Acton, Vidya Zweizig
 
 -- 4. Find all employees with first names 'Irena', 'Vidya', or 'Maya', and order your results returned by last name and then first name. In your comments, answer
 -- What was the first and last name in the first row of the results? What was the first and last name of the last person in the table?
@@ -118,6 +118,6 @@ FROM employees
 WHERE hire_date BETWEEN '1990-01-01' AND '1999-12-31'
 	AND birth_date like '%12-25'
     ORDER BY birth_date ASC, hire_date DESC;
--- A. 16
+-- A. 362
 -- A. Khun Bernini
 -- A. Douadi Pettis
