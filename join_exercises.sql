@@ -1,54 +1,85 @@
+-- 1. Use the join_example_db. Select all the records from both the users and roles tables.
+USE join_example_db;
+
+SELECT *
+FROM roles;
+
+SELECT *
+FROM users;
+
+-- 2. Use join, left join, and right join to combine results from the users and roles tables as we did in the lesson. 
+-- Before you run each query, guess the expected number of results.
+
+SELECT users.`name` as user_name, roles.`name` as role_name
+FROM users
+JOIN roles ON users.role_id = roles.id;
+-- 
+
+SELECT users.`name` AS user_name, roles.`name` AS role_name
+FROM users
+LEFT JOIN roles ON users.role_id = roles.id;
+-- 
+
+SELECT users.`name` AS user_name, roles.`name` AS role_name
+FROM users
+RIGHT JOIN roles ON users.role_id = roles.id;
+-- 
+
+-- 3. Although not explicitly covered in the lesson, aggregate functions like count can be used with join queries. 
+-- Use count and the appropriate join type to get a list of roles along with the number of users that has the role. 
+-- Hint: You will also need to use group by in the query.
+
+SELECT roles.`name` AS role_name, COUNT(users.id) AS user_count
+FROM roles
+LEFT JOIN users ON users.role_id = roles.id
+GROUP BY roles.`name`;
+--
+
 -- 1. Use the employees database.
 USE employees;
 
 -- 2. Using the example in the Associative Table Joins section as a guide, 
 -- write a query that shows each department along with the name of the current manager for that department.
-SELECT *
-	FROM employees as e
-    JOIN dept_manager as d
-    ON e.emp_no = d.emp_no 
-    JOIN departments as n
-    on n.dept_no = d.dept_no;
-    
--- select distinct
--- dept_name,
--- dept_no
--- from departments;
+	
 
--- select distinct
--- dept_no,
--- emp_no
--- from dept_manager
--- where to_date > current_date();
+-- ---------------------------------------------------------------
+SELECT dept_name as 'Department Name',
+		dept_no
+FROM departments;
 
--- select distinct
--- emp_no,
--- first_name,
--- last_name
--- from employees;
+SELECT emp_no, dept_no
+FROM dept_manager
+WHERE to_date > curdate();
 
--- select
--- dept_name,
--- concat(c.first_name,' ',c.last_name) as manager_name
--- from departments a
--- join (
--- select distinct
--- dept_no,
--- emp_no
--- from dept_manager
--- where to_date > current_date()
--- ) b
--- on a.dept_no = b.dept_no
--- join (
--- select distinct
--- emp_no,
--- first_name,
--- last_name
--- from employees
--- ) c 
--- on b.emp_no = c.emp_no;
+SELECT emp_no, first_name, last_name, CONCAT(first_name, ' ', last_name) as 'Department Manager'
+FROM employees;
+-- ---------------------------------------------------------------
+SELECT d.dept_name as 'Department Name', CONCAT(e.first_name, ' ', e.last_name)
+FROM departments as d
+INNER JOIN dept_manager as dm
+ON dm.dept_no = d.dept_no
+INNER JOIN employees as e
+ON e.emp_no=dm.emp_no
+WHERE dm.to_date > CURDATE()
+ORDER BY d.dept_name;
 
 
+SELECT dept_name as 'Department Name' ,
+		CONCAT(first_name, ' ',last_name) as 'Department Manager'
+FROM departments as a
+JOIN(
+SELECT emp_no, dept_no
+FROM dept_manager
+WHERE to_date > curdate()
+) as b
+ON a.dept_no = b.dept_no
+JOIN(
+SELECT emp_no, first_name,last_name
+FROM employees
+) as c
+ON b.emp_no  = c.emp_no
+ORDER by dept_name
+;
 
 --   Department Name    | Department Manager
 --  --------------------+--------------------
@@ -62,15 +93,46 @@ SELECT *
 --   Research           | Hilary Kambil
 --   Sales              | Hauke Zhang
 
+-- ----------------------------------------------------------------------------------------------------------
 
 -- 3. Find the name of all departments currently managed by women.
-SELECT *
-	FROM employees as e
-    JOIN dept_manager as d
-    ON e.emp_no = d.emp_no 
-     JOIN departments as n
-     on n.dept_no = d.dept_no
-    WHERE gender = 'F';
+-- First Try :(
+			-- SELECT *
+			-- 	FROM employees as e
+			--     JOIN dept_manager as d
+			--     ON e.emp_no = d.emp_no 
+			--      JOIN departments as n
+			--      on n.dept_no = d.dept_no
+			--     WHERE gender = 'F';
+SELECT d.dept_name as 'Department Name', CONCAT(e.first_name, ' ', e.last_name) as 'Department Manager'
+FROM departments as d
+INNER JOIN dept_manager as dm
+ON dm.dept_no = d.dept_no
+INNER JOIN employees as e
+ON e.emp_no=dm.emp_no
+WHERE dm.to_date > CURDATE()
+AND e.gender = 'F'
+ORDER BY d.dept_name;
+
+
+SELECT dept_name as 'Department Name' ,
+		CONCAT(first_name, ' ',last_name) as 'Department Manager'
+FROM departments as a
+JOIN(
+SELECT emp_no, dept_no
+FROM dept_manager
+WHERE to_date > curdate()
+) as b
+ON a.dept_no = b.dept_no
+JOIN(
+SELECT emp_no, first_name,last_name
+FROM employees
+WHERE gender = 'F'										-- this line had to be added to only include Female DM
+) as c
+ON b.emp_no  = c.emp_no
+ORDER by dept_name
+;
+
 
 -- Department Name | Manager Name
 -- ----------------+-----------------
@@ -78,15 +140,56 @@ SELECT *
 -- Finance         | Isamu Legleitner
 -- Human Resources | Karsetn Sigstam
 -- Research        | Hilary Kambil
-
+-- ----------------------------------------------------------------------------------------------------------
 
 -- 4. Find the current titles of employees currently working in the Customer Service department.
-SELECT *
-FROM employees as e
-	JOIN dept_emp as d
-    ON e.emp_no = d.emp_no
-    WHERE dept_no = 'd009';
 
+SELECT *
+FROM titles;
+
+SELECT emp_no, dept_no, to_date
+FROM dept_emp
+WHERE dept_no = 'd009'; -- d009 is Customer Service department
+
+
+SELECT emp_no, title, to_date
+FROM titles
+WHERE to_date > curdate();
+
+SELECT dept_no
+FROM departments;
+
+SELECT t.title as 'Title', COUNT(t.title) as 'Count'
+FROM titles as t
+INNER JOIN employees as e
+ON e.emp_no = t.emp_no
+INNER JOIN dept_emp as de
+ON de.emp_no = e.emp_no
+WHERE de.to_date > CURDATE()
+AND t.to_date > CURDATE()
+AND de.dept_no = 'd009'
+GROUP BY t.title
+ORDER BY title
+;
+
+
+
+SELECT title as 'Title', Count(c.title) as 'Count'
+FROM departments as a
+JOIN(
+SELECT emp_no, dept_no, to_date
+FROM dept_emp
+WHERE dept_no = 'd009'
+) as b
+ON a.dept_no = b.dept_no
+JOIN(
+SELECT emp_no, title, to_date
+FROM titles
+WHERE to_date > curdate()
+) as c
+ON b.emp_no = c.emp_no
+group by title
+order by title;
 
 -- Title              | Count
 -- -------------------+------
@@ -97,10 +200,51 @@ FROM employees as e
 -- Senior Staff       | 11268
 -- Staff              |  3574
 -- Technique Leader   |   241
-
+-- ----------------------------------------------------------------------------------------------------------
 
 -- 5.  Find the current salary of all current managers.
+SELECT emp_no, salary
+FROM salaries
+WHERE to_date > CURDATE();
 
+
+SELECT d.dept_name as 'Department Name', CONCAT(p.first_name, ' ', p.last_name) as 'Name', s.salary as 'Salary'
+FROM departments as d
+INNER JOIN dept_manager as dm
+ON dm.dept_no =d.dept_no
+INNER JOIN employees as e
+ON e.emp_no = dm.emp_no
+INNER JOIN salaries as s
+ON s.emp_no = e.emp_no
+WHERE dm.to_date > CURDATE()
+AND s.to_date > CURDATE()
+ORDER BY d.dept_name
+
+
+;
+
+
+SELECT dept_name as 'Department Name' ,
+		CONCAT(first_name, ' ',last_name) as 'Department Manager', salary
+FROM departments as a
+JOIN(
+SELECT emp_no, dept_no
+FROM dept_manager
+WHERE to_date > curdate()
+) as b
+ON a.dept_no = b.dept_no
+JOIN(
+SELECT emp_no, first_name,last_name
+FROM employees
+) as c
+ON b.emp_no  = c.emp_no
+JOIN(
+SELECT emp_no, salary
+FROM salaries
+WHERE to_date > CURDATE()
+) as d
+ON c.emp_no = d.emp_no
+ORDER by dept_name;
 
 -- Department Name    | Name              | Salary
 -- -------------------+-------------------+-------
@@ -114,8 +258,36 @@ FROM employees as e
 -- Research           | Hilary Kambil     |  79393
 -- Sales              | Hauke Zhang       | 101987
 
-
+-- ----------------------------------------------------------------------------------------------------------
 -- 6. Find the number of current employees in each department.
+SELECT dept_no, dept_name
+FROM departments;
+
+SELECT emp_no, to_date
+FROM dept_emp
+WHERE to_date > CURDATE();
+
+SELECT d,dept_no, d.dept_name, COUNT(*) as nu
+FROM dept_emp as de
+LEFT JOIN departments as d
+ON d.dept_no = de.dept_no
+WHERE de.to_date > CURDATE()
+GROUP BY d.dept_name
+ORDER BY d.dept_no
+;
+
+
+
+SELECT a.dept_no, a.dept_name, COUNT(b.emp_no) as num
+FROM departments as a
+JOIN(
+SELECT dept_no, emp_no, to_date
+FROM dept_emp
+WHERE to_date > CURDATE()
+) as b
+ON a.dept_no = b.dept_no
+group by dept_name
+order by dept_no;
 
 
 -- +---------+--------------------+---------------+
@@ -132,7 +304,7 @@ FROM employees as e
 -- | d009    | Customer Service   | 17569         |
 -- +---------+--------------------+---------------+
 
-
+-- ----------------------------------------------------------------------------------------------------------
 -- 7. Which department has the highest average salary? Hint: Use current not historic information.
 
 select
@@ -156,9 +328,34 @@ limit 1;
 -- | Sales     | 88852.9695     |
 -- +-----------+----------------+
 
-
+-- ----------------------------------------------------------------------------------------------------------
 -- 8. Who is the highest paid employee in the Marketing department?
+SELECT emp_no, first_name, last_name
+FROM employees;
 
+SELECT dept_no, emp_no, to_date
+FROM dept_emp;
+
+SELECT emp_no, to_date
+FROM salaries
+WHERE to_date > CURDATE();
+
+SELECT first_name, last_name
+FROM employees as a
+JOIN(
+SELECT dept_no, emp_no, to_date
+FROM dept_emp
+where dept_no = 'd001'
+) as b
+ON a.emp_no = b.emp_no
+JOIN(
+SELECT emp_no, to_date, salary
+FROM salaries
+WHERE to_date > CURDATE()
+) as c
+ON b.emp_no = c.emp_no
+order by salary DESC
+limit 1;
 
 -- +------------+-----------+
 -- | first_name | last_name |
@@ -166,7 +363,7 @@ limit 1;
 -- | Akemi      | Warwick   |
 -- +------------+-----------+
 
-
+-- ----------------------------------------------------------------------------------------------------------
 -- 9. Which current department manager has the highest salary?
 
 
@@ -176,7 +373,7 @@ limit 1;
 -- | Vishwani   | Minakawa  | 106491 | Marketing |
 -- +------------+-----------+--------+-----------+
 
-
+-- ----------------------------------------------------------------------------------------------------------
 -- 10. Determine the average salary for each department. Use all salary information and round your results.
 
 
@@ -202,7 +399,7 @@ limit 1;
 -- | Human Resources    | 55575          |
 -- +--------------------+----------------+
 
-
+-- ----------------------------------------------------------------------------------------------------------
 -- 11. Bonus Find the names of all current employees, their department name, and their current manager's name.
 
 
