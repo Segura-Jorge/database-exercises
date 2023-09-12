@@ -9,6 +9,44 @@ SELECT *
     ON e.emp_no = d.emp_no 
     JOIN departments as n
     on n.dept_no = d.dept_no;
+    
+-- select distinct
+-- dept_name,
+-- dept_no
+-- from departments;
+
+-- select distinct
+-- dept_no,
+-- emp_no
+-- from dept_manager
+-- where to_date > current_date();
+
+-- select distinct
+-- emp_no,
+-- first_name,
+-- last_name
+-- from employees;
+
+-- select
+-- dept_name,
+-- concat(c.first_name,' ',c.last_name) as manager_name
+-- from departments a
+-- join (
+-- select distinct
+-- dept_no,
+-- emp_no
+-- from dept_manager
+-- where to_date > current_date()
+-- ) b
+-- on a.dept_no = b.dept_no
+-- join (
+-- select distinct
+-- emp_no,
+-- first_name,
+-- last_name
+-- from employees
+-- ) c 
+-- on b.emp_no = c.emp_no;
 
 
 
@@ -43,6 +81,11 @@ SELECT *
 
 
 -- 4. Find the current titles of employees currently working in the Customer Service department.
+SELECT *
+FROM employees as e
+	JOIN dept_emp as d
+    ON e.emp_no = d.emp_no
+    WHERE dept_no = 'd009';
 
 
 -- Title              | Count
@@ -92,6 +135,20 @@ SELECT *
 
 -- 7. Which department has the highest average salary? Hint: Use current not historic information.
 
+select
+a.dept_name,
+avg(c.salary) as average_salary  
+from (
+	select distinct dept_name, dept_no from departments) a
+join (
+	select distinct dept_no, emp_no from dept_emp where to_date > curdate()) b
+	on a.dept_no = b.dept_no
+join (
+	select distinct emp_no, salary from salaries where to_date > curdate()) c
+	on b.emp_no = c.emp_no
+group by 1 -- 1 refers to the first column in the select statement, 2 to the 2nd, etc
+order by 2 desc
+limit 1;
 
 -- +-----------+----------------+
 -- | dept_name | average_salary |
