@@ -267,7 +267,7 @@ SELECT emp_no, to_date
 FROM dept_emp
 WHERE to_date > CURDATE();
 
-SELECT d,dept_no, d.dept_name, COUNT(*) as nu
+SELECT d.dept_no, d.dept_name, COUNT(*) as num_employees
 FROM dept_emp as de
 LEFT JOIN departments as d
 ON d.dept_no = de.dept_no
@@ -307,6 +307,20 @@ order by dept_no;
 -- ----------------------------------------------------------------------------------------------------------
 -- 7. Which department has the highest average salary? Hint: Use current not historic information.
 
+SELECT d.dept_name, AVG(s.salary) as average_salary
+FROM salaries as s
+LEFT JOIN employees as e
+	ON e.emp_no = s.emp_no
+INNER JOIN dept_emp as de
+	ON de.emp_no = e.emp_no
+INNER JOIN departments as d
+	ON d.dept_no = de.dept_no
+WHERE de.to_date > CURDATE()
+	AND s.to_date > CURDATE()
+GROUP BY d.dept_name
+ORDER BY avg(s.salary);
+
+
 select
 a.dept_name,
 avg(c.salary) as average_salary  
@@ -330,6 +344,23 @@ limit 1;
 
 -- ----------------------------------------------------------------------------------------------------------
 -- 8. Who is the highest paid employee in the Marketing department?
+
+SELECT e.first_name, e.last_name
+FROM salaries as s
+LEFT JOIN employees as e
+	ON e.emp_no = s.emp_no
+INNER JOIN dept_emp as de
+	ON de.emp_no = e.emp_no
+INNER JOIN departments as d
+	ON d.dept_no = de.dept_no
+WHERE d.dept_name = 'marketing'
+	AND de.to_date > NOW()
+    AND s.to_date > NOW()
+    ORDER BY s.salary DESC
+    LIMIT 1;
+
+
+
 SELECT emp_no, first_name, last_name
 FROM employees;
 
@@ -366,6 +397,21 @@ limit 1;
 -- ----------------------------------------------------------------------------------------------------------
 -- 9. Which current department manager has the highest salary?
 
+SELECT e.first_name, e.last_name, s.salary, d.dept_name
+FROM employees as e
+INNER JOIN dept_manager as dm
+	ON dm.emp_no = e.emp_no
+LEFT JOIN slalaries as s
+	ON s.emp_no = e.emp_no
+INNER JOIN departments as d
+	ON d.dept_no = dm.dept_no
+WHERE dm.to_date > NOW()
+	AND s.to_date > NOW()
+ORDER BY s.salary DESC
+LIMIT 1
+;
+
+
 
 -- +------------+-----------+--------+-----------+
 -- | first_name | last_name | salary | dept_name |
@@ -375,6 +421,16 @@ limit 1;
 
 -- ----------------------------------------------------------------------------------------------------------
 -- 10. Determine the average salary for each department. Use all salary information and round your results.
+
+SELECT d.dept_name, ROUND(AVG(s.salary)) as average_salary
+FROM salaries as s
+LEFT JOIN dept_emp as de
+	ON de.emp_no = s.emp_no
+INNER JOIN departments as d
+	ON d.dept_no = de.dept_no
+GROUP BY d.dept_name
+ORDER BY ROUND(avg(s.salary)) DESC
+;
 
 
 -- +--------------------+----------------+
@@ -401,7 +457,17 @@ limit 1;
 
 -- ----------------------------------------------------------------------------------------------------------
 -- 11. Bonus Find the names of all current employees, their department name, and their current manager's name.
-
+SELECT 
+	CONCAT(e.first_name, ' ', e.last_name) AS 'Employee Name', 
+	g.dept_name AS 'Department Name',
+	CONCAT(man_e.first_name, ' ', man_e.last_name) AS 'Manager Name'
+FROM employees AS e
+JOIN dept_emp AS f ON f.emp_no = e.emp_no
+JOIN departments AS g ON g.dept_no = f.dept_no
+JOIN dept_manager AS h ON h.dept_no = f.dept_no
+JOIN employees AS man_e ON man_e.emp_no = h.emp_no
+WHERE f.to_date = '9999-01-01' AND h.to_date = '9999-01-01'
+ORDER BY g.dept_name, e.emp_no;
 
 -- 240,124 Rows
 
