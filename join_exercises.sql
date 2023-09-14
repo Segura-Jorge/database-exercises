@@ -401,7 +401,7 @@ SELECT e.first_name, e.last_name, s.salary, d.dept_name
 FROM employees as e
 INNER JOIN dept_manager as dm
 	ON dm.emp_no = e.emp_no
-LEFT JOIN slalaries as s
+LEFT JOIN salaries as s
 	ON s.emp_no = e.emp_no
 INNER JOIN departments as d
 	ON d.dept_no = dm.dept_no
@@ -462,11 +462,16 @@ SELECT
 	g.dept_name AS 'Department Name',
 	CONCAT(man_e.first_name, ' ', man_e.last_name) AS 'Manager Name'
 FROM employees AS e
-JOIN dept_emp AS f ON f.emp_no = e.emp_no
-JOIN departments AS g ON g.dept_no = f.dept_no
-JOIN dept_manager AS h ON h.dept_no = f.dept_no
-JOIN employees AS man_e ON man_e.emp_no = h.emp_no
-WHERE f.to_date = '9999-01-01' AND h.to_date = '9999-01-01'
+	JOIN dept_emp AS f 
+    ON f.emp_no = e.emp_no
+	JOIN departments AS g 
+    ON g.dept_no = f.dept_no
+	JOIN dept_manager AS h 
+    ON h.dept_no = f.dept_no
+	JOIN employees AS man_e 
+    ON man_e.emp_no = h.emp_no
+WHERE f.to_date = '9999-01-01' 
+	AND h.to_date = '9999-01-01'
 ORDER BY g.dept_name, e.emp_no;
 
 -- 240,124 Rows
