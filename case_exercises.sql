@@ -40,7 +40,7 @@ SELECT last_name, first_name,
 FROM employees;
 -- ORDER BY last_name;
 
-
+-- USING REGULAR EXPRESSION IN THE RANGE OF LAST_NAME.
 SELECT CONCAT(last_name, " ", first_name) as Last_First_Names,
 	      CASE
 			WHEN last_name REGEXP '^[a-h]' THEN "A-F"
@@ -48,8 +48,6 @@ SELECT CONCAT(last_name, " ", first_name) as Last_First_Names,
 			ELSE "R-Z"
 	     END AS alpha_group
 	 FROM employees;
-
-
 
 -- 3. -- ----------------------------------------------------------------------------------------------------------
 -- How many employees (current or previous) were born in each decade?
@@ -99,8 +97,26 @@ FROM dept_emp AS de
 JOIN departments AS d ON de.dept_no = d.dept_no
 JOIN salaries AS s ON s.emp_no = de.emp_no
 GROUP BY dept_group;
--- I FORGOT TO ONLY CALCU;ATE CURRENT SALARIES FOR EACH DEPARTMENT
--- FIND THE RIGHT ANSWER HERE
+-- ON PREVIOUS ANSWER, I FORGOT TO ONLY CALCULATE CURRENT SALARIES FOR EACH DEPARTMENT );
+-- INSTRUCTORS VERSION - CORRECT
+SELECT
+	CASE 
+		WHEN dept_name IN ('Research','Development') THEN 'R&D'
+        WHEN dept_name IN ('Sales', 'Marketing') THEN 'Sales & Marketing'
+        WHEN dept_name IN ('Production', 'Quality Management') THEN 'Prod & QM'
+        WHEN dept_name IN ('Finance','Human Resources') THEN 'Finance & HR'
+        ELSE dept_name 
+	END as 'dept_group'
+    , ROUND(AVG(salary),2) as avg_sal
+FROM salaries
+	JOIN dept_emp
+		USING (emp_no)
+	JOIN departments
+		USING (dept_no)
+WHERE salaries.to_date > now()
+	AND dept_emp.to_date > now()
+GROUP BY dept_group
+;
 
 -- BONUS -- ----------------------------------------------------------------------------------------------------------
 -- Remove duplicate employees from exercise 1
